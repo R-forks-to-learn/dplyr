@@ -126,7 +126,12 @@ summarise_new_cols <- function(.data, ...) {
     #
     # TODO: reinject hybrid evaluation at the R level
     quo <- dots[[i]]
-    chunks <- mask$eval_all_summarise(quo, dots_names, i)
+    chunks <- tryCatch(
+      mask$eval_all_summarise(quo, dots_names, i),
+      simpleError = function(e) {
+        stop_eval_tidy(e, index = i, quo = quo, fn = "summarise")
+      }
+    )
 
     # check that vec_size() of chunks is compatible with .size
     # and maybe update .size
